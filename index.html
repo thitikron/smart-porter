@@ -1,0 +1,1192 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Smart Porter — รพ.ชุมชนแม่แตง</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0077B6">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="เรียกเปล">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --blue:#0077B6;--blue-d:#005f92;--blue-l:#E0F4FF;--blue-m:#CAE8F9;
+  --red:#D62828;--red-l:#FEE9E9;
+  --orange:#E76F00;--orange-l:#FFF3E0;
+  --green:#1B7A5E;--green-l:#E6F5F0;
+  --purple:#6B21A8;--purple-l:#F3E8FF;
+  --crimson:#991B1B;--crimson-l:#FFF1F1;
+  --gray:#64748B;--gray-l:#F1F5F9;--gray-b:#E2E8F0;
+  --text:#0F172A;--text2:#475569;--text3:#94A3B8;
+  --r:12px;--rsm:8px;--rf:100px;
+  --sat:env(safe-area-inset-top,0px);--sab:env(safe-area-inset-bottom,0px);
+}
+html,body{height:100%;overflow:hidden;font-family:'Noto Sans Thai',system-ui,sans-serif;background:#F0F6FF;color:var(--text)}
+
+/* ===== FIXED SCREENS ===== */
+.screen-fixed{position:fixed;inset:0;z-index:500}
+#login-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(160deg,#003f73 0%,#0077B6 55%,#0096C7 100%);padding:24px 20px;padding-top:calc(var(--sat) + 24px)}
+.login-card{background:#fff;border-radius:20px;padding:28px 24px;width:100%;max-width:360px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.login-logo{text-align:center;margin-bottom:20px}
+.login-logo-ico{font-size:52px;display:block;margin-bottom:6px}
+.login-title{font-size:20px;font-weight:900;color:var(--blue)}
+.login-sub{font-size:12px;color:var(--text2);margin-top:2px}
+.lbl{display:block;font-size:11px;font-weight:800;color:var(--text2);margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px}
+.fld{width:100%;padding:11px 14px;border:1.5px solid var(--gray-b);border-radius:var(--rsm);font-size:14px;font-family:inherit;color:var(--text);transition:border .2s;margin-bottom:14px}
+.fld:focus{outline:none;border-color:var(--blue)}
+.fld-wrap{position:relative;margin-bottom:14px}
+.fld-wrap .fld{padding-right:44px;margin-bottom:0}
+.eye-btn{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:17px;color:var(--text3);padding:4px;line-height:1}
+.err-box{background:var(--red-l);border:1px solid #fca5a5;border-radius:var(--rsm);padding:9px 12px;font-size:13px;color:var(--red);margin-bottom:14px;display:none}
+.err-box.on{display:block}
+.sec-note{font-size:10px;color:var(--text3);text-align:center;margin-top:12px;line-height:1.6}
+
+/* ===== SHEETS ===== */
+.sheet-over{position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;justify-content:center;padding-bottom:var(--sab)}
+.sheet{background:#fff;border-radius:20px 20px 0 0;padding:28px 24px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto}
+.sheet-hd{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px}
+.sheet-title{font-size:18px;font-weight:900}
+.sheet-sub{font-size:12px;color:var(--text2);margin-top:2px}
+.x-btn{background:none;border:none;font-size:22px;cursor:pointer;color:var(--text3);line-height:1;padding:2px;flex-shrink:0;margin-left:10px}
+
+/* ===== APP SHELL ===== */
+.app{display:flex;flex-direction:column;height:100%;max-width:640px;margin:0 auto;background:#F0F6FF;padding-top:var(--sat)}
+.header{background:var(--blue);color:#fff;padding:11px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;box-shadow:0 2px 8px rgba(0,119,182,.3)}
+.header-l{display:flex;align-items:center;gap:10px}
+.h-logo{font-size:22px;line-height:1}
+.h-title{font-size:15px;font-weight:900;line-height:1.2}
+.h-sub{font-size:10px;opacity:.75}
+.h-right{display:flex;align-items:center;gap:8px}
+.h-time{font-size:11px;opacity:.85;font-variant-numeric:tabular-nums}
+.badge{background:#FF3B30;color:#fff;border-radius:var(--rf);min-width:19px;height:19px;padding:0 5px;font-size:11px;font-weight:900;display:none;align-items:center;justify-content:center}
+.badge.on{display:flex}
+.offline-bar{background:var(--red);color:#fff;text-align:center;font-size:12px;padding:6px;display:none;flex-shrink:0}
+.offline-bar.on{display:block}
+.prof-bar{display:flex;align-items:center;gap:8px;background:#fff;border-bottom:1px solid var(--gray-b);padding:8px 16px;flex-shrink:0}
+.prof-av{width:32px;height:32px;border-radius:50%;background:var(--blue-l);border:2px solid var(--blue-m);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.prof-name{font-size:13px;font-weight:900;line-height:1.2}
+.prof-role-lbl{font-size:10px;color:var(--text2)}
+.role-badge{font-size:10px;font-weight:900;padding:2px 8px;border-radius:var(--rf)}
+.rb-super{background:#FEF3C7;color:#92400E}
+.rb-admin{background:var(--blue-l);color:var(--blue-d)}
+.rb-porter{background:var(--green-l);color:var(--green)}
+
+/* ===== TABS ===== */
+.tab-bar{display:flex;background:#fff;border-bottom:1px solid var(--gray-b);flex-shrink:0}
+.tab{flex:1;padding:9px 4px 7px;text-align:center;font-size:11px;font-weight:700;color:var(--text3);border:none;background:none;cursor:pointer;border-bottom:2.5px solid transparent;transition:all .2s;position:relative;font-family:inherit}
+.tab.active{color:var(--blue);border-bottom-color:var(--blue)}
+.tab-ico{font-size:18px;display:block;margin-bottom:2px;line-height:1}
+.tdot{position:absolute;top:5px;right:calc(50% - 14px);width:8px;height:8px;background:#FF3B30;border-radius:50%;display:none}
+.tdot.on{display:block}
+
+/* ===== CONTENT ===== */
+.content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 12px 24px}
+.fade-in{animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.hidden{display:none!important}
+.sec-lbl{font-size:11px;font-weight:900;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px}
+
+/* ===== PORTER STATUS CARDS (ward view) ===== */
+.porter-status-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px}
+.ps-card{border-radius:var(--r);border:2px solid var(--gray-b);padding:12px 10px;cursor:pointer;transition:all .18s;background:#fff;position:relative;-webkit-tap-highlight-color:transparent;text-align:center}
+.ps-card:active{transform:scale(.96)}
+.ps-card.available{border-color:#22C55E;background:#F0FDF4}
+.ps-card.available:hover{box-shadow:0 4px 12px rgba(34,197,94,.2)}
+.ps-card.busy{border-color:var(--orange);background:#FFFBEB;cursor:not-allowed;opacity:.8}
+.ps-card.offline{border-color:var(--gray-b);background:var(--gray-l);cursor:not-allowed;opacity:.6}
+.ps-card.selected-porter{border-color:var(--blue);background:var(--blue-l);box-shadow:0 0 0 3px rgba(0,119,182,.2)}
+.ps-av{font-size:28px;display:block;margin-bottom:6px;line-height:1}
+.ps-name{font-size:12px;font-weight:900;line-height:1.3;color:var(--text)}
+.ps-pos{font-size:10px;color:var(--text2);margin-top:2px;line-height:1.3}
+.ps-status{display:inline-flex;align-items:center;gap:4px;margin-top:6px;font-size:11px;font-weight:800;padding:3px 8px;border-radius:var(--rf)}
+.ps-status.s-available{background:#F0FDF4;color:#15803D}
+.ps-status.s-busy{background:#FFFBEB;color:#B45309}
+.ps-status.s-offline{background:var(--gray-l);color:var(--text3)}
+.ps-status-dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0}
+.ps-status-dot.blink-dot{animation:blink-a 1.2s ease-in-out infinite}
+@keyframes blink-a{0%,100%{opacity:1}50%{opacity:.2}}
+.ps-busy-task{font-size:9px;color:var(--orange);margin-top:4px;line-height:1.4;font-weight:700}
+.ps-lock{position:absolute;top:6px;right:8px;font-size:14px;opacity:.6}
+.ps-select-mark{position:absolute;top:6px;right:8px;font-size:14px;color:var(--blue)}
+.ps-rating{font-size:11px;color:#F59E0B;margin-top:3px}
+
+/* ===== CARDS ===== */
+.card{background:#fff;border-radius:var(--r);border:1px solid var(--gray-b);margin-bottom:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.07)}
+.card-hd{padding:12px 16px;border-bottom:1px solid var(--gray-b);display:flex;align-items:center;gap:8px}
+.card-title{font-size:14px;font-weight:900}
+.card-sub{font-size:12px;color:var(--text2)}
+.card-body{padding:14px 16px}
+
+/* ===== URGENCY ===== */
+.urg-grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:8px}
+.urg-grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px}
+.urg-card{border:2px solid var(--gray-b);border-radius:var(--r);padding:10px 4px;text-align:center;cursor:pointer;transition:all .16s;background:#fff;-webkit-tap-highlight-color:transparent;user-select:none}
+.urg-card:active{transform:scale(.94)}
+.urg-card .ui{font-size:24px;display:block;margin-bottom:3px;line-height:1}
+.urg-card .ul{font-size:11px;font-weight:900;line-height:1.2}
+.urg-card .us{font-size:9px;margin-top:1px;opacity:.7}
+.urg-card.sel[data-u="normal"]   {border-color:#22C55E;background:#F0FDF4}
+.urg-card.sel[data-u="urgent"]   {border-color:#F59E0B;background:#FFFBEB}
+.urg-card.sel[data-u="emergency"]{border-color:var(--red);background:var(--red-l)}
+.urg-card.sel[data-u="ems"]      {border-color:var(--crimson);background:var(--crimson-l)}
+.urg-card.sel[data-u="forensic"] {border-color:var(--purple);background:var(--purple-l)}
+
+/* ===== TYPE ===== */
+.type-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.type-card{border:2px solid var(--gray-b);border-radius:var(--r);padding:10px 4px;text-align:center;cursor:pointer;transition:all .16s;background:#fff;-webkit-tap-highlight-color:transparent;user-select:none}
+.type-card:active{transform:scale(.94)}
+.type-card.sel{border-color:var(--blue);background:var(--blue-l)}
+.type-card .ti{font-size:26px;display:block;margin-bottom:4px}
+.type-card .tl{font-size:11px;font-weight:900;color:var(--text)}
+.type-card .ts{font-size:9px;color:var(--text2);margin-top:1px}
+
+/* ===== PILL ===== */
+.pill{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:var(--rf);font-size:11px;font-weight:900}
+.pn{background:#F0FDF4;color:#15803D}
+.pu{background:#FFFBEB;color:#B45309}
+.pe{background:var(--red-l);color:var(--red)}
+.pm{background:var(--crimson-l);color:var(--crimson)}
+.pf{background:var(--purple-l);color:var(--purple)}
+.dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0}
+.blink{animation:blink 1s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.15}}
+
+/* ===== CALL BUTTON ===== */
+.call-wrap{text-align:center;padding:12px 0 4px}
+.call-btn{width:140px;height:140px;border-radius:50%;border:none;cursor:pointer;color:#fff;font-size:13px;font-weight:900;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;margin:0 auto;position:relative;transition:transform .12s,box-shadow .12s;-webkit-tap-highlight-color:transparent;font-family:inherit}
+.call-btn:active{transform:scale(.93)}
+.call-btn-ico{font-size:38px;line-height:1}
+.cb-normal   {background:linear-gradient(145deg,#0090D4,#0077B6);box-shadow:0 6px 24px rgba(0,119,182,.4)}
+.cb-urgent   {background:linear-gradient(145deg,#F59E0B,#D97706);box-shadow:0 6px 24px rgba(245,158,11,.4)}
+.cb-emergency{background:linear-gradient(145deg,#EF4444,#D62828);box-shadow:0 6px 24px rgba(214,40,40,.45)}
+.cb-ems      {background:linear-gradient(145deg,#DC2626,#7F1D1D);box-shadow:0 6px 24px rgba(127,29,29,.5)}
+.cb-forensic {background:linear-gradient(145deg,#7C3AED,#5B21B6);box-shadow:0 6px 24px rgba(91,33,182,.45)}
+.pulse{position:absolute;width:100%;height:100%;border-radius:50%;border:3px solid rgba(255,255,255,.3);animation:pulse 2.2s ease-out infinite}
+@keyframes pulse{0%{transform:scale(1);opacity:.8}100%{transform:scale(1.28);opacity:0}}
+
+/* ===== TRACKING CARD (Grab-style) ===== */
+.tracking-card{background:#fff;border-radius:var(--r);border:2px solid var(--blue-m);margin-bottom:12px;overflow:hidden;box-shadow:0 4px 16px rgba(0,119,182,.15)}
+.track-hd{padding:12px 16px;background:linear-gradient(135deg,#004C8A,#0077B6);color:#fff;display:flex;align-items:center;justify-content:space-between}
+.track-hd-title{font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.5px;opacity:.85}
+.track-hd-name{font-size:16px;font-weight:900;margin-top:2px}
+.track-porter-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--gray-b)}
+.track-av{width:50px;height:50px;border-radius:50%;background:var(--blue-l);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;border:2px solid var(--blue-m)}
+.track-porter-name{font-size:15px;font-weight:900}
+.track-porter-info{font-size:12px;color:var(--text2);margin-top:2px}
+.track-porter-rating{font-size:13px;color:#F59E0B;margin-top:3px}
+
+/* Real-time progress bar */
+.progress-bar-wrap{padding:0 16px 14px}
+.progress-track{display:flex;align-items:stretch;gap:0;margin-bottom:0}
+.pstep{flex:1;display:flex;flex-direction:column;align-items:center;position:relative}
+.pstep-dot{width:28px;height:28px;border-radius:50%;border:2.5px solid var(--gray-b);background:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;z-index:1;position:relative;transition:all .4s}
+.pstep-dot.done{background:var(--green);border-color:var(--green);color:#fff}
+.pstep-dot.active{background:var(--blue);border-color:var(--blue);color:#fff;animation:sdp 1.5s ease-in-out infinite}
+@keyframes sdp{0%,100%{box-shadow:0 0 0 0 rgba(0,119,182,.4)}50%{box-shadow:0 0 0 8px rgba(0,119,182,0)}}
+.pstep-dot.pending{background:#fff;border-color:var(--gray-b);color:var(--text3)}
+.pstep-line{position:absolute;top:14px;left:50%;width:100%;height:3px;background:var(--gray-b);z-index:0;transition:background .4s}
+.pstep-line.done{background:var(--green)}
+.pstep-line.active{background:linear-gradient(90deg,var(--green),var(--blue))}
+.pstep:last-child .pstep-line{display:none}
+.pstep-label{font-size:10px;font-weight:700;text-align:center;margin-top:6px;line-height:1.3;color:var(--text3)}
+.pstep-label.done{color:var(--green)}
+.pstep-label.active{color:var(--blue);font-weight:900}
+
+/* ETA bar */
+.eta-bar{padding:8px 16px 14px;display:flex;align-items:center;gap:10px;background:#F8FAFF;border-top:1px solid var(--blue-m)}
+.eta-ico{font-size:20px}
+.eta-text{font-size:13px;color:var(--text2)}
+.eta-val{font-size:18px;font-weight:900;color:var(--blue)}
+
+/* ===== INCOMING (Porter) ===== */
+.incoming{border:2px solid var(--red);border-radius:var(--r);background:#fff;overflow:hidden;margin-bottom:12px;box-shadow:0 4px 16px rgba(214,40,40,.2);animation:bflash 1s ease-in-out infinite}
+@keyframes bflash{0%,100%{border-color:var(--red)}50%{border-color:#ff8080}}
+.inc-hd{background:var(--red-l);padding:10px 16px;display:flex;align-items:center;justify-content:space-between}
+.inc-title{font-size:14px;font-weight:900;color:var(--red)}
+.inc-timer-wrap{display:flex;flex-direction:column;align-items:center}
+.inc-timer{font-size:26px;font-weight:900;color:var(--red);font-variant-numeric:tabular-nums;line-height:1}
+.inc-timer-lbl{font-size:9px;color:var(--red);opacity:.7}
+.inc-timer-bar{width:60px;height:3px;background:#fca5a5;border-radius:2px;margin-top:3px;overflow:hidden}
+.inc-timer-fill{height:100%;background:var(--red);border-radius:2px;transition:width 1s linear}
+.drow{display:flex;align-items:flex-start;gap:10px;padding:5px 16px}
+.di{font-size:18px;width:26px;text-align:center;flex-shrink:0;margin-top:1px}
+.dt{font-size:13px}
+.dt strong{font-size:14px;display:block;margin-bottom:1px}
+.arow{display:flex;gap:10px;padding:12px 16px}
+
+/* Porter status update buttons */
+.status-update-row{padding:8px 16px 14px;display:flex;gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.status-btn{flex-shrink:0;padding:8px 14px;border-radius:var(--rsm);border:none;cursor:pointer;font-size:12px;font-weight:900;font-family:inherit;transition:all .15s;-webkit-tap-highlight-color:transparent}
+.status-btn:active{transform:scale(.94)}
+.status-btn.current{background:var(--blue);color:#fff}
+.status-btn.done-step{background:var(--green-l);color:var(--green);text-decoration:line-through;opacity:.6}
+.status-btn.future{background:var(--gray-l);color:var(--text2)}
+
+/* ===== BUTTONS ===== */
+.btn{padding:11px 16px;border-radius:var(--rsm);border:none;cursor:pointer;font-size:13px;font-weight:900;transition:transform .12s;display:flex;align-items:center;justify-content:center;gap:6px;font-family:inherit;-webkit-tap-highlight-color:transparent}
+.btn:active{transform:scale(.95)}
+.btn-primary{background:var(--blue);color:#fff;flex:1}
+.btn-secondary{background:var(--gray-l);color:var(--text2);flex:1}
+.btn-success{background:var(--green);color:#fff;flex:1}
+.btn-danger{background:var(--red);color:#fff}
+.btn-outline{background:transparent;border:1.5px solid var(--blue);color:var(--blue)}
+.btn-sm{padding:7px 12px;font-size:12px}
+.btn-full{width:100%}
+.btn-lg{padding:14px 20px;font-size:15px}
+.spinner{width:18px;height:18px;border:2.5px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ===== STATS ===== */
+.stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px}
+.stat-card{background:#fff;border-radius:var(--rsm);border:1px solid var(--gray-b);padding:14px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.stat-num{font-size:30px;font-weight:900;line-height:1}
+.stat-lbl{font-size:11px;color:var(--text2);margin-top:4px}
+.list-item{background:#fff;border-radius:var(--rsm);border:1px solid var(--gray-b);padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px}
+.sdot-sm{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.s-available{background:#22C55E}
+.s-busy{background:#F59E0B;animation:blink 1.5s ease-in-out infinite}
+.s-offline{background:#CBD5E1}
+.hist-item{background:#fff;border-radius:var(--rsm);border:1px solid var(--gray-b);padding:12px 14px;margin-bottom:8px}
+
+/* ===== RATING ===== */
+.rate-over{position:fixed;inset:0;z-index:700;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;justify-content:center;padding-bottom:var(--sab)}
+.rate-sh{background:#fff;border-radius:20px 20px 0 0;padding:24px 20px;width:100%;max-width:480px;text-align:center}
+.stars{display:flex;gap:8px;justify-content:center;margin-bottom:14px}
+.star{font-size:36px;cursor:pointer;color:#E2E8F0;transition:color .15s}
+.star.on{color:#F59E0B}
+
+/* ===== INFO/WARN ===== */
+.info-box{background:var(--blue-l);border:1px solid var(--blue-m);border-radius:var(--rsm);padding:10px 12px;font-size:12px;color:var(--blue-d);margin-bottom:10px;line-height:1.6}
+.warn-box{background:#FFFBEB;border:1px solid #FDE68A;border-radius:var(--rsm);padding:10px 12px;font-size:12px;color:#92400E;margin-bottom:10px;line-height:1.6}
+.success-box{background:var(--green-l);border:1px solid #86EFAC;border-radius:var(--rsm);padding:10px 12px;font-size:12px;color:var(--green);margin-bottom:10px;line-height:1.6}
+
+/* ===== TOAST ===== */
+.toast{position:fixed;bottom:calc(72px + var(--sab));left:50%;transform:translateX(-50%);background:rgba(15,23,42,.92);backdrop-filter:blur(8px);color:#fff;padding:10px 18px;border-radius:var(--rf);font-size:13px;z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap;max-width:90vw;text-align:center}
+.toast.on{opacity:1}
+
+/* Realtime pulse indicator */
+.rt-indicator{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--green);font-weight:700}
+.rt-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:rt-pulse 1.5s ease-in-out infinite}
+@keyframes rt-pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.4);opacity:.6}}
+
+select,textarea{font-family:inherit}
+select{width:100%;padding:10px 12px;border:1.5px solid var(--gray-b);border-radius:var(--rsm);font-size:14px;background:#fff;color:var(--text);appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748B' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
+select:focus{outline:none;border-color:var(--blue)}
+
+@media(min-width:640px){
+  .porter-status-grid{grid-template-columns:repeat(3,1fr)}
+  .stats-grid{grid-template-columns:repeat(4,1fr)}
+}
+</style>
+</head>
+<body>
+
+<!-- ========== LOGIN ========== -->
+<div id="login-screen" class="screen-fixed">
+  <div class="login-card">
+    <div class="login-logo">
+      <span class="login-logo-ico">🏥</span>
+      <div class="login-title">Smart Porter</div>
+      <div class="login-sub">โรงพยาบาลชุมชนแม่แตง จ.เชียงใหม่</div>
+    </div>
+    <label class="lbl">ชื่อผู้ใช้งาน (Username)</label>
+    <input class="fld" id="inp-u" type="text" placeholder="กรอก username" autocapitalize="none" autocomplete="username">
+    <label class="lbl">รหัสผ่าน (Password)</label>
+    <div class="fld-wrap">
+      <input class="fld" id="inp-p" type="password" placeholder="กรอก password" autocomplete="current-password">
+      <button class="eye-btn" onclick="toggleEye('inp-p','e0')" type="button"><span id="e0">👁️</span></button>
+    </div>
+    <div class="err-box" id="login-err">❌ ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง</div>
+    <button class="btn btn-primary btn-full btn-lg" onclick="doLogin()" style="margin-bottom:10px">เข้าสู่ระบบ</button>
+    <button class="btn btn-secondary btn-full btn-sm" onclick="openForgot()">🔑 ลืมรหัสผ่าน?</button>
+    <div class="sec-note">ระบบสำหรับเจ้าหน้าที่ รพ.ชุมชนแม่แตงเท่านั้น<br>ปัญหาเข้าสู่ระบบ ติดต่อ IT: คุณฐิติกร ใหม่ศรี</div>
+  </div>
+</div>
+
+<!-- ========== FORGOT PASSWORD ========== -->
+<div id="forgot-screen" class="sheet-over hidden">
+  <div class="sheet">
+    <div class="sheet-hd">
+      <div><div class="sheet-title">🔑 ลืมรหัสผ่าน</div><div class="sheet-sub">ยืนยันตัวตนด้วยวันเกิด</div></div>
+      <button class="x-btn" onclick="closeForgot()">✕</button>
+    </div>
+    <div id="fg-s1">
+      <label class="lbl">ชื่อผู้ใช้งาน</label>
+      <input class="fld" id="fg-u" type="text" placeholder="กรอก username" autocapitalize="none">
+      <label class="lbl">วันเกิด (ปี พ.ศ.)</label>
+      <div class="info-box">📅 รูปแบบ <strong>วัน/เดือน/ปี พ.ศ.</strong><br>ตัวอย่าง: <strong>01/01/2550</strong> หรือ <strong>17/10/2536</strong></div>
+      <input class="fld" id="fg-dob" type="text" placeholder="เช่น 17/10/2536" maxlength="10">
+      <div class="err-box" id="fg-err1">❌ ชื่อผู้ใช้หรือวันเกิดไม่ถูกต้อง</div>
+      <button class="btn btn-primary btn-full" onclick="verifyDOB()">ยืนยันตัวตน →</button>
+    </div>
+    <div id="fg-s2" class="hidden">
+      <div class="success-box">✅ ยืนยันตัวตนสำเร็จ — กรุณาตั้งรหัสผ่านใหม่</div>
+      <label class="lbl">รหัสผ่านใหม่</label>
+      <div class="fld-wrap"><input class="fld" id="fg-n1" type="password" placeholder="อย่างน้อย 6 ตัวอักษร"><button class="eye-btn" onclick="toggleEye('fg-n1','e1')" type="button"><span id="e1">👁️</span></button></div>
+      <label class="lbl">ยืนยันรหัสผ่านใหม่</label>
+      <div class="fld-wrap"><input class="fld" id="fg-n2" type="password" placeholder="พิมพ์รหัสผ่านอีกครั้ง"><button class="eye-btn" onclick="toggleEye('fg-n2','e2')" type="button"><span id="e2">👁️</span></button></div>
+      <div class="err-box" id="fg-err2"></div>
+      <button class="btn btn-success btn-full btn-lg" onclick="doResetPass()">💾 บันทึกรหัสผ่านใหม่</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== CHANGE PASSWORD ========== -->
+<div id="chpass-modal" class="sheet-over hidden">
+  <div class="sheet">
+    <div class="sheet-hd">
+      <div><div class="sheet-title">🔐 เปลี่ยนรหัสผ่าน</div></div>
+      <button class="x-btn" onclick="closeChpass()">✕</button>
+    </div>
+    <label class="lbl">รหัสผ่านปัจจุบัน</label>
+    <div class="fld-wrap"><input class="fld" id="cp-o" type="password" placeholder="รหัสผ่านปัจจุบัน"><button class="eye-btn" onclick="toggleEye('cp-o','e3')" type="button"><span id="e3">👁️</span></button></div>
+    <label class="lbl">รหัสผ่านใหม่</label>
+    <div class="fld-wrap"><input class="fld" id="cp-n1" type="password" placeholder="อย่างน้อย 6 ตัวอักษร"><button class="eye-btn" onclick="toggleEye('cp-n1','e4')" type="button"><span id="e4">👁️</span></button></div>
+    <label class="lbl">ยืนยันรหัสผ่านใหม่</label>
+    <div class="fld-wrap"><input class="fld" id="cp-n2" type="password" placeholder="พิมพ์รหัสผ่านอีกครั้ง"><button class="eye-btn" onclick="toggleEye('cp-n2','e5')" type="button"><span id="e5">👁️</span></button></div>
+    <div class="err-box" id="cp-err"></div>
+    <button class="btn btn-success btn-full btn-lg" onclick="doChpass()">💾 บันทึกรหัสผ่านใหม่</button>
+  </div>
+</div>
+
+<!-- ========== MAIN APP ========== -->
+<div class="app hidden" id="main-app">
+  <div class="offline-bar" id="offline-bar">📵 ออฟไลน์ — ข้อมูลอาจไม่เป็นปัจจุบัน</div>
+  <div class="header">
+    <div class="header-l">
+      <div class="h-logo">🏥</div>
+      <div><div class="h-title">Smart Porter</div><div class="h-sub">รพ.ชุมชนแม่แตง v1.2</div></div>
+    </div>
+    <div class="h-right">
+      <div class="rt-indicator" id="rt-ind"><span class="rt-dot"></span>LIVE</div>
+      <div class="badge" id="alert-badge">0</div>
+      <div class="h-time" id="htime"></div>
+    </div>
+  </div>
+  <div class="prof-bar">
+    <div class="prof-av" id="prof-av">👤</div>
+    <div style="flex:1"><div class="prof-name" id="prof-name">—</div><div class="prof-role-lbl" id="prof-pos">—</div></div>
+    <div class="role-badge" id="prof-rb">—</div>
+    <button class="btn btn-sm btn-outline" style="margin-left:6px;font-size:10px;padding:5px 8px" onclick="openChpass()">🔐</button>
+    <button class="btn btn-sm" style="background:var(--red-l);color:var(--red);margin-left:4px;font-size:10px;padding:5px 8px" onclick="doLogout()">ออก</button>
+  </div>
+  <div class="tab-bar">
+    <button class="tab active" onclick="goTab('ward')" id="tab-ward"><span class="tab-ico">🏢</span>หอผู้ป่วย</button>
+    <button class="tab" onclick="goTab('porter')" id="tab-porter"><span class="tab-ico">👨‍⚕️</span>จนท.เปล<span class="tdot" id="tdot-p"></span></button>
+    <button class="tab" onclick="goTab('admin')" id="tab-admin"><span class="tab-ico">📊</span>ภาพรวม</button>
+    <button class="tab" onclick="goTab('history')" id="tab-history"><span class="tab-ico">📋</span>ประวัติ</button>
+  </div>
+
+  <div class="content" id="content">
+
+  <!-- ============ WARD VIEW ============ -->
+  <div id="view-ward" class="fade-in">
+
+    <!-- Active tracking (real-time) -->
+    <div id="tracking-section" class="hidden">
+      <div class="tracking-card">
+        <!-- Header -->
+        <div class="track-hd">
+          <div>
+            <div class="track-hd-title">🔄 กำลังดำเนินการ</div>
+            <div class="track-hd-name" id="track-title">—</div>
+          </div>
+          <div style="text-align:right">
+            <div id="track-pill"></div>
+            <div class="rt-indicator" style="margin-top:4px;justify-content:flex-end"><span class="rt-dot" style="background:#fff"></span><span style="color:rgba(255,255,255,.9)">Real-time</span></div>
+          </div>
+        </div>
+        <!-- Porter info -->
+        <div class="track-porter-row">
+          <div class="track-av" id="track-av">👨‍⚕️</div>
+          <div style="flex:1">
+            <div class="track-porter-name" id="track-name">—</div>
+            <div class="track-porter-info" id="track-info">พนักงานเปล</div>
+            <div class="track-porter-rating">⭐ <span id="track-rating">4.8</span> <span style="color:var(--text3);font-size:11px" id="track-jobs"></span></div>
+          </div>
+          <a href="tel:0800001111" style="text-decoration:none"><div class="btn btn-outline btn-sm">📞 โทร</div></a>
+        </div>
+        <!-- Progress steps -->
+        <div class="progress-bar-wrap" id="progress-steps"></div>
+        <!-- ETA -->
+        <div class="eta-bar" id="eta-bar">
+          <div class="eta-ico">⏱️</div>
+          <div style="flex:1"><div class="eta-text">เวลาโดยประมาณ</div></div>
+          <div class="eta-val" id="eta-val">รอรับเคส...</div>
+        </div>
+      </div>
+      <button class="btn btn-secondary btn-full" onclick="cancelReq()" style="margin-bottom:10px">✕ ยกเลิกการเรียก</button>
+    </div>
+
+    <!-- Call Form -->
+    <div id="call-section">
+
+      <!-- Porter Status Section -->
+      <div class="card">
+        <div class="card-hd">
+          <span>👥</span>
+          <div style="flex:1"><div class="card-title">เลือก จนท.เปล</div><div class="card-sub">สถานะแบบ Real-time</div></div>
+          <div class="rt-indicator"><span class="rt-dot"></span>LIVE</div>
+        </div>
+        <div class="card-body" style="padding-top:10px">
+          <div class="porter-status-grid" id="porter-status-grid">
+            <!-- populated by JS -->
+          </div>
+          <div class="info-box" id="no-porter-selected" style="margin-bottom:0">👆 เลือก จนท.เปล ที่ต้องการ หรือระบบจะเลือกให้อัตโนมัติ</div>
+          <div class="success-box hidden" id="porter-selected-info" style="margin-bottom:0">✅ เลือก: <strong id="selected-porter-name">—</strong></div>
+        </div>
+      </div>
+
+      <!-- Call Details -->
+      <div class="card">
+        <div class="card-hd"><span>🚑</span><div><div class="card-title">รายละเอียดการเรียก</div><div class="card-sub">กรอกข้อมูลให้ครบก่อนกด</div></div></div>
+        <div class="card-body">
+
+          <div class="sec-lbl">ประเภทการเรียก</div>
+          <div class="type-grid">
+            <div class="type-card sel" onclick="pickType(this,'wheelchair')"><span class="ti">♿</span><div class="tl">รถเข็นนั่ง</div><div class="ts">Wheelchair</div></div>
+            <div class="type-card" onclick="pickType(this,'stretcher')"><span class="ti">🛏️</span><div class="tl">รถเข็นนอน</div><div class="ts">Stretcher</div></div>
+            <div class="type-card" onclick="pickType(this,'walking')"><span class="ti">🚶</span><div class="tl">พยุงเดิน</div><div class="ts">Walk assist</div></div>
+          </div>
+
+          <div class="sec-lbl">ระดับความเร่งด่วน</div>
+          <div class="urg-grid-3">
+            <div class="urg-card sel" data-u="normal" onclick="pickUrg(this,'normal')"><span class="ui">🟢</span><div class="ul" style="color:#15803D">ปกติ</div><div class="us" style="color:#15803D">Normal</div></div>
+            <div class="urg-card" data-u="urgent" onclick="pickUrg(this,'urgent')"><span class="ui">🟡</span><div class="ul" style="color:#B45309">ด่วน</div><div class="us" style="color:#B45309">Urgent</div></div>
+            <div class="urg-card" data-u="emergency" onclick="pickUrg(this,'emergency')"><span class="ui">🔴</span><div class="ul" style="color:var(--red)">ฉุกเฉิน</div><div class="us" style="color:var(--red)">Emergency</div></div>
+          </div>
+          <div class="urg-grid-2">
+            <div class="urg-card" data-u="ems" onclick="pickUrg(this,'ems')"><span class="ui">🚨</span><div class="ul" style="color:var(--crimson)">EMS</div><div class="us" style="color:var(--crimson)">วิกฤต / Refer</div></div>
+            <div class="urg-card" data-u="forensic" onclick="pickUrg(this,'forensic')"><span class="ui">🔵</span><div class="ul" style="color:var(--purple)">ชันสูตร</div><div class="us" style="color:var(--purple)">Forensic</div></div>
+          </div>
+
+          <div class="sec-lbl">ต้นทาง → ปลายทาง</div>
+          <div style="display:flex;gap:8px;margin-bottom:14px">
+            <select id="sel-from" style="flex:1">
+              <option value="">📍 ต้นทาง</option>
+              <option>อายุรกรรม</option><option>ศัลยกรรม</option><option>สูติกรรม</option>
+              <option>กุมารเวชกรรม</option><option>ห้องฉุกเฉิน</option><option>คลินิกพิเศษ</option>
+              <option>X-Ray</option><option>ห้องผ่าตัด</option><option>ไตเทียม</option><option>OPD</option>
+            </select>
+            <select id="sel-to" style="flex:1">
+              <option value="">🏁 ปลายทาง</option>
+              <option>ห้อง X-Ray</option><option>CT Scan</option><option>ห้องผ่าตัด</option>
+              <option>Ultrasound</option><option>ห้องฉุกเฉิน</option><option>ไอซียู (ICU)</option>
+              <option>ห้องคลอด</option><option>ห้องตรวจ OPD</option><option>ไตเทียม</option>
+              <option>นิติเวช</option><option>ห้อง EMS</option>
+            </select>
+          </div>
+
+          <!-- Summary -->
+          <div style="background:var(--gray-l);border-radius:var(--rsm);padding:10px 12px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between">
+            <div style="font-size:12px;color:var(--text2)">ประเภท: <strong id="sum-type">รถเข็นนั่ง</strong></div>
+            <div id="sum-urg-pill"><div class="pill pn"><span class="dot"></span>🟢 ปกติ</div></div>
+          </div>
+
+          <div class="call-wrap">
+            <button class="call-btn cb-normal" id="call-btn" onclick="callPorter()">
+              <div class="pulse"></div><div class="call-btn-ico">🔔</div><div>เรียกเปล</div>
+            </button>
+          </div>
+          <div style="font-size:11px;color:var(--text3);text-align:center;margin-top:12px">กดปุ่มเพื่อส่งคำขอทันที</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ PORTER VIEW ============ -->
+  <div id="view-porter" class="hidden fade-in">
+    <!-- Profile -->
+    <div class="card" style="margin-bottom:12px">
+      <div class="card-body" style="display:flex;align-items:center;gap:14px">
+        <div style="width:52px;height:52px;border-radius:50%;background:var(--blue-l);border:2px solid var(--blue-m);display:flex;align-items:center;justify-content:center;font-size:24px" id="p-av">👨‍⚕️</div>
+        <div style="flex:1">
+          <div style="font-size:15px;font-weight:900" id="p-name">—</div>
+          <div style="font-size:12px;color:var(--text2)" id="p-pos">—</div>
+          <div style="font-size:13px;color:#F59E0B;margin-top:3px">⭐ <span id="p-rating">4.8</span></div>
+        </div>
+        <div onclick="toggleStatus()" style="cursor:pointer"><div class="pill pn" id="porter-pill"><span class="dot"></span>พร้อมรับงาน</div></div>
+      </div>
+    </div>
+
+    <!-- Incoming alert -->
+    <div id="incoming-section" class="hidden">
+      <div class="incoming fade-in">
+        <div class="inc-hd">
+          <div class="inc-title">⚡ คำขอใหม่เข้ามา!</div>
+          <div class="inc-timer-wrap">
+            <div class="inc-timer" id="inc-timer">30</div>
+            <div class="inc-timer-lbl">วินาที</div>
+            <div class="inc-timer-bar"><div class="inc-timer-fill" id="inc-timer-fill" style="width:100%"></div></div>
+          </div>
+        </div>
+        <div style="padding:10px 0 4px">
+          <div class="drow"><div class="di" id="inc-ico">♿</div><div class="dt"><strong id="inc-type">—</strong>ประเภทความช่วยเหลือ</div><div style="margin-left:auto" id="inc-upill"></div></div>
+          <div class="drow"><div class="di">📍</div><div class="dt"><strong id="inc-from">—</strong>ต้นทาง → <span id="inc-to">—</span></div></div>
+          <div class="drow"><div class="di">👤</div><div class="dt"><strong id="inc-req">—</strong>ผู้ส่งคำขอ</div></div>
+          <div class="drow" style="padding-bottom:6px"><div class="di">⏱️</div><div class="dt"><strong id="inc-time">—</strong>เวลาที่ส่ง</div></div>
+        </div>
+        <div class="arow">
+          <button class="btn btn-secondary" onclick="rejectReq()">✕ ปฏิเสธ</button>
+          <button class="btn btn-primary" onclick="acceptReq()">✓ รับเคส</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Idle -->
+    <div id="idle-section" style="text-align:center;padding:32px 16px;color:var(--text3)">
+      <div style="font-size:56px;margin-bottom:12px">🕐</div>
+      <div style="font-size:15px;font-weight:900;color:var(--text2)">รอรับเคส...</div>
+      <div style="font-size:12px;margin-top:4px">Waiting for requests</div>
+    </div>
+
+    <!-- Active jobs with status update buttons -->
+    <div>
+      <div style="font-size:13px;font-weight:900;margin-bottom:10px">งานที่รับอยู่ <span id="job-count" style="color:var(--blue)"></span></div>
+      <div id="active-jobs"><div id="no-jobs" style="text-align:center;padding:16px;color:var(--text3);font-size:13px">ยังไม่มีงาน</div></div>
+    </div>
+  </div>
+
+  <!-- ============ ADMIN VIEW ============ -->
+  <div id="view-admin" class="hidden fade-in">
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-num" style="color:var(--orange)" id="st-w">0</div><div class="stat-lbl">🕐 รอเปล</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:var(--blue)" id="st-a">0</div><div class="stat-lbl">🔄 ดำเนินการ</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:var(--green)" id="st-d">3</div><div class="stat-lbl">✅ เสร็จวันนี้</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:#F59E0B;font-size:20px">⭐ 4.8</div><div class="stat-lbl">คะแนนเฉลี่ย</div></div>
+    </div>
+    <div class="card">
+      <div class="card-hd"><span>👥</span><div class="card-title">สถานะ จนท.เปล (Real-time)</div></div>
+      <div class="card-body" id="admin-porter-list"></div>
+    </div>
+    <div class="card">
+      <div class="card-hd"><span>📋</span><div class="card-title">คำขอปัจจุบัน</div></div>
+      <div class="card-body" id="admin-req-list"><div style="text-align:center;color:var(--text3);font-size:13px;padding:12px">ยังไม่มีคำขอ</div></div>
+    </div>
+    <div class="card hidden" id="user-mgmt-card">
+      <div class="card-hd"><span>🔑</span><div class="card-title">ผู้ใช้งานทั้งหมด</div></div>
+      <div class="card-body" id="user-list"></div>
+    </div>
+    <button class="btn btn-outline btn-full" onclick="simReq()" style="margin-bottom:10px">🎭 จำลองคำขอ (Demo)</button>
+  </div>
+
+  <!-- ============ HISTORY VIEW ============ -->
+  <div id="view-history" class="hidden fade-in">
+    <div style="font-size:13px;font-weight:900;margin-bottom:12px">ประวัติการให้บริการวันนี้</div>
+    <div id="hist-list"></div>
+  </div>
+
+  </div><!-- /content -->
+</div><!-- /main-app -->
+
+<!-- Rating -->
+<div class="rate-over hidden" id="rate-modal">
+  <div class="rate-sh">
+    <div style="font-size:48px;margin-bottom:6px">⭐</div>
+    <div style="font-size:18px;font-weight:900;margin-bottom:4px">ให้คะแนน จนท.เปล</div>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:20px" id="rate-name">—</div>
+    <div class="stars" id="rate-stars">
+      <span class="star on" onclick="setRating(1)">★</span><span class="star on" onclick="setRating(2)">★</span>
+      <span class="star on" onclick="setRating(3)">★</span><span class="star on" onclick="setRating(4)">★</span>
+      <span class="star" onclick="setRating(5)">★</span>
+    </div>
+    <div style="font-size:14px;color:var(--text2);margin-bottom:16px" id="rate-lbl">ดีมาก</div>
+    <textarea placeholder="ความคิดเห็นเพิ่มเติม..." rows="2" style="width:100%;padding:10px 12px;border:1.5px solid var(--gray-b);border-radius:var(--rsm);font-size:13px;resize:none;margin-bottom:16px;font-family:inherit"></textarea>
+    <button class="btn btn-primary btn-full btn-lg" onclick="submitRate()">ส่งคะแนน ★</button>
+    <button class="btn btn-secondary btn-full" style="margin-top:8px" onclick="closeRate()">ข้ามไปก่อน</button>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ===================== USER DATABASE =====================
+const DB = {
+  'thitikron': {pw:'Mth@1439',dob:'17/10/2536',role:'super',name:'นายฐิติกร ใหม่ศรี',pos:'นักวิชาการคอมพิวเตอร์',av:'💻'},
+  'jiranun.k': {pw:'Mth@9186',dob:'27/06/2513',role:'admin',name:'นาง จิระนันท์ เขียวศรี',pos:'พยาบาลวิชาชีพชำนาญการพิเศษ',av:'👩‍⚕️'},
+  'nukool.c':  {pw:'Mth@6125',dob:'06/11/2530',role:'porter',name:'นาย นุกุล เฉลิมชาติ',pos:'พนักงานเปล',av:'👨‍⚕️',rating:4.8,jobs:128,status:'available',currentJob:null},
+  'somchat.p': {pw:'Mth@6931',dob:'16/02/2523',role:'porter',name:'นาย สมชาติ ภูเขา',pos:'พนักงานช่วยเหลือคนไข้',av:'👨‍⚕️',rating:4.6,jobs:95,status:'available',currentJob:null},
+  'wijak.r':   {pw:'Mth@8227',dob:'26/02/2523',role:'porter',name:'นาย วิจักษ์ ร่างรัตน์',pos:'พนักงานเปล',av:'👨‍⚕️',rating:4.9,jobs:210,status:'busy',currentJob:'นำส่ง OPD → CT Scan',currentStep:2},
+  'phichin.s': {pw:'Mth@5812',dob:'16/07/2526',role:'porter',name:'นาย พิชิต สมใจ',pos:'พนักงานเปล',av:'👨‍⚕️',rating:4.7,jobs:156,status:'available',currentJob:null},
+  'jetsada.m': {pw:'Mth@9854',dob:'09/09/2518',role:'porter',name:'นาย เจษฎา เมืองคำ',pos:'พนักงานเปล',av:'👨‍⚕️',rating:4.5,jobs:87,status:'offline',currentJob:null},
+  'nid.t':     {pw:'Mth@6821',dob:'16/10/2513',role:'porter',name:'นาย นิต เทพวัง',pos:'พนักงานช่วยเหลือคนไข้',av:'👨‍⚕️',rating:4.6,jobs:74,status:'available',currentJob:null},
+};
+try{const sp=JSON.parse(localStorage.getItem('smp_pw')||'{}');Object.keys(sp).forEach(k=>{if(DB[k])DB[k].pw=sp[k];});}catch(e){}
+
+// ===================== SHARED STATE (localStorage sync) =====================
+function getShared(){try{return JSON.parse(localStorage.getItem('smp_state')||'{}')}catch(e){return {};}}
+function setShared(data){localStorage.setItem('smp_state',JSON.stringify({...getShared(),...data,ts:Date.now()}));}
+function broadcastMsg(msg){
+  try{
+    if(!window._bc)window._bc=new BroadcastChannel('smart-porter');
+    window._bc.postMessage(msg);
+  }catch(e){}
+  // also write to localStorage for cross-tab fallback
+  setShared({lastMsg:msg,lastMsgTs:Date.now()});
+}
+
+// ===================== URGENCY + TYPE CONFIG =====================
+const URGS={
+  normal:   {label:'ปกติ',    emoji:'🟢',cls:'pn',btnCls:'cb-normal',   etaMin:5},
+  urgent:   {label:'ด่วน',    emoji:'🟡',cls:'pu',btnCls:'cb-urgent',   etaMin:3},
+  emergency:{label:'ฉุกเฉิน',emoji:'🔴',cls:'pe',btnCls:'cb-emergency',etaMin:2},
+  ems:      {label:'EMS',     emoji:'🚨',cls:'pm',btnCls:'cb-ems',      etaMin:1},
+  forensic: {label:'ชันสูตร',emoji:'🔵',cls:'pf',btnCls:'cb-forensic', etaMin:5},
+};
+const TYPES={wheelchair:{ico:'♿',label:'รถเข็นนั่ง'},stretcher:{ico:'🛏️',label:'รถเข็นนอน'},walking:{ico:'🚶',label:'พยุงเดิน'}};
+const STEPS=['รับเคส','กำลังเดินทาง','ถึงที่รับ','กำลังนำส่ง','เสร็จสิ้น ✅'];
+const STEP_ETA=['รอ จนท.รับ...','~5 นาที','~2 นาที','~3 นาที','นำส่งแล้ว'];
+
+// ===================== APP STATE =====================
+const S={
+  user:null,view:'ward',type:'wheelchair',urg:'normal',
+  request:null,incoming:null,online:true,
+  selectedPorterKey:null,
+  done:3,active:0,waiting:0,ratingVal:4,
+  requests:[],forgotUser:null,trackStep:-1,
+};
+
+// ===================== UTILS =====================
+function $(i){return document.getElementById(i);}
+function toast(m,d=2800){const t=$('toast');t.textContent=m;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),d);}
+function tnow(){return new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});}
+function mkPill(u){const ud=URGS[u];return`<div class="pill ${ud.cls}"><span class="dot blink"></span>${ud.emoji} ${ud.label}</div>`;}
+function toggleEye(f,s){const el=$(f),sp=$(s);el.type=el.type==='password'?'text':'password';sp.textContent=el.type==='password'?'👁️':'🙈';}
+function savePw(u,p){try{const s=JSON.parse(localStorage.getItem('smp_pw')||'{}');s[u]=p;localStorage.setItem('smp_pw',JSON.stringify(s));}catch(e){}}
+setInterval(()=>{const t=$('htime');if(t)t.textContent=new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit',second:'2-digit'});},1000);
+
+// ===================== AUDIO =====================
+let _ac=null;
+function ac(){if(!_ac)_ac=new(window.AudioContext||window.webkitAudioContext)();return _ac;}
+function beep(f=880,d=.15,t='sine',v=.35){try{const c=ac(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.type=t;o.frequency.value=f;g.gain.setValueAtTime(v,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+d);o.start(c.currentTime);o.stop(c.currentTime+d);}catch(e){}}
+function alertSnd(){beep(880,.14);setTimeout(()=>beep(1100,.14),190);setTimeout(()=>beep(880,.14),380);}
+let aLoop=null;
+function startAlert(){alertSnd();aLoop=setInterval(()=>{if(!S.incoming){stopAlert();return;}alertSnd();},2800);}
+function stopAlert(){clearInterval(aLoop);aLoop=null;}
+
+// ===================== BROADCAST CHANNEL (Real-time) =====================
+function initBroadcast(){
+  try{
+    window._bc=new BroadcastChannel('smart-porter');
+    window._bc.onmessage=(e)=>handleMsg(e.data);
+  }catch(err){}
+  // localStorage fallback poll
+  let lastTs=0;
+  setInterval(()=>{
+    try{
+      const shared=getShared();
+      if(shared.lastMsgTs&&shared.lastMsgTs>lastTs){
+        lastTs=shared.lastMsgTs;
+        if(shared.lastMsg)handleMsg(shared.lastMsg);
+      }
+    }catch(e){}
+  },500);
+}
+
+function handleMsg(msg){
+  if(!msg||!msg.type)return;
+  switch(msg.type){
+    case 'REQUEST_CREATED':
+      // Porter tab: show incoming
+      if(S.user&&S.user.role==='porter'&&DB[S.user.username].status==='available'){
+        showIncoming(msg.req);
+      }
+      // Admin tab: refresh
+      if(S.view==='admin')renderAdmin();
+      break;
+    case 'REQUEST_ACCEPTED':
+      // Ward tab: update tracking
+      if(S.request&&S.request.id===msg.reqId){
+        S.request.porter=msg.porter;
+        S.request.status='accepted';
+        DB[msg.porterKey]={...DB[msg.porterKey],status:'busy',currentJob:msg.jobDesc,currentStep:0};
+        showTrackingView(S.request);
+        updateTrackStep(0);
+        toast('✅ '+msg.porter.name+' รับเคสแล้ว! กำลังเดินทาง');
+        beep(660,.12);setTimeout(()=>beep(880,.15),150);
+      }
+      renderPorterStatusGrid();
+      if(S.view==='admin')renderAdmin();
+      break;
+    case 'STATUS_UPDATE':
+      // Ward tab: update steps
+      if(S.request&&S.request.id===msg.reqId){
+        updateTrackStep(msg.step);
+        if(msg.step===4){finishTrack();}
+      }
+      DB[msg.porterKey]={...DB[msg.porterKey],currentStep:msg.step};
+      renderPorterStatusGrid();
+      if(S.view==='admin')renderAdmin();
+      break;
+    case 'PORTER_STATUS_CHANGED':
+      DB[msg.key]={...DB[msg.key],status:msg.status,currentJob:msg.currentJob||null};
+      renderPorterStatusGrid();
+      if(S.view==='admin')renderAdmin();
+      break;
+  }
+}
+
+// ===================== LOGIN =====================
+function doLogin(){
+  const u=$('inp-u').value.trim(),p=$('inp-p').value;
+  $('login-err').classList.remove('on');
+  const ud=DB[u];
+  if(!ud||ud.pw!==p){$('login-err').classList.add('on');beep(220,.3,'square',.2);return;}
+  S.user={...ud,username:u};
+  $('login-screen').style.display='none';
+  $('main-app').classList.remove('hidden');
+  initApp();
+  beep(660,.12);setTimeout(()=>beep(880,.15),150);
+}
+function doLogout(){
+  S.user=null;S.request=null;S.incoming=null;S.selectedPorterKey=null;
+  $('login-screen').style.display='';$('main-app').classList.add('hidden');
+  $('inp-u').value='';$('inp-p').value='';$('login-err').classList.remove('on');
+}
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&$('login-screen').style.display!=='none')doLogin();});
+
+// ===================== FORGOT/CHANGE PW =====================
+function openForgot(){$('forgot-screen').classList.remove('hidden');$('fg-u').value='';$('fg-dob').value='';$('fg-err1').classList.remove('on');$('fg-s1').classList.remove('hidden');$('fg-s2').classList.add('hidden');}
+function closeForgot(){$('forgot-screen').classList.add('hidden');S.forgotUser=null;}
+function verifyDOB(){
+  const u=$('fg-u').value.trim(),d=$('fg-dob').value.trim();
+  $('fg-err1').classList.remove('on');
+  if(!DB[u]||DB[u].dob!==d){$('fg-err1').classList.add('on');return;}
+  S.forgotUser=u;$('fg-s1').classList.add('hidden');$('fg-s2').classList.remove('hidden');$('fg-n1').value='';$('fg-n2').value='';$('fg-err2').classList.remove('on');
+}
+function doResetPass(){
+  const n1=$('fg-n1').value,n2=$('fg-n2').value;
+  $('fg-err2').classList.remove('on');
+  if(n1.length<6){$('fg-err2').textContent='❌ ต้องมีอย่างน้อย 6 ตัวอักษร';$('fg-err2').classList.add('on');return;}
+  if(n1!==n2){$('fg-err2').textContent='❌ รหัสผ่านไม่ตรงกัน';$('fg-err2').classList.add('on');return;}
+  DB[S.forgotUser].pw=n1;savePw(S.forgotUser,n1);closeForgot();toast('✅ รีเซ็ตรหัสผ่านสำเร็จ');
+}
+function openChpass(){$('chpass-modal').classList.remove('hidden');$('cp-o').value='';$('cp-n1').value='';$('cp-n2').value='';$('cp-err').classList.remove('on');}
+function closeChpass(){$('chpass-modal').classList.add('hidden');}
+function doChpass(){
+  const o=$('cp-o').value,n1=$('cp-n1').value,n2=$('cp-n2').value;
+  $('cp-err').classList.remove('on');
+  if(DB[S.user.username].pw!==o){$('cp-err').textContent='❌ รหัสผ่านปัจจุบันไม่ถูกต้อง';$('cp-err').classList.add('on');return;}
+  if(n1.length<6){$('cp-err').textContent='❌ ต้องมีอย่างน้อย 6 ตัวอักษร';$('cp-err').classList.add('on');return;}
+  if(n1!==n2){$('cp-err').textContent='❌ รหัสผ่านไม่ตรงกัน';$('cp-err').classList.add('on');return;}
+  DB[S.user.username].pw=n1;S.user.pw=n1;savePw(S.user.username,n1);closeChpass();toast('✅ เปลี่ยนรหัสผ่านสำเร็จ');
+}
+
+// ===================== INIT APP =====================
+function initApp(){
+  const u=S.user;
+  $('prof-av').textContent=u.av||'👤';
+  $('prof-name').textContent=u.name;
+  $('prof-pos').textContent=u.pos;
+  const rb=$('prof-rb');
+  const roleMap={super:['⭐ Super Admin','rb-super'],admin:['🏥 Admin OPD','rb-admin'],porter:['👨‍⚕️ Porter','rb-porter']};
+  const [rl,rc]=roleMap[u.role]||['—',''];
+  rb.textContent=rl;rb.className='role-badge '+rc;
+  if(u.role==='porter'){
+    $('tab-ward').classList.add('hidden');$('tab-admin').classList.add('hidden');$('tab-history').classList.add('hidden');
+    $('p-av').textContent=u.av||'👨‍⚕️';$('p-name').textContent=u.name;$('p-pos').textContent=u.pos;$('p-rating').textContent=u.rating||'4.8';
+    goTab('porter');
+  } else {
+    $('tab-porter').classList.add('hidden');
+    $('tab-ward').classList.remove('hidden');$('tab-admin').classList.remove('hidden');$('tab-history').classList.remove('hidden');
+    renderPorterStatusGrid();
+    goTab('ward');
+  }
+  if(u.role==='super'){$('user-mgmt-card').classList.remove('hidden');renderUsers();}
+  renderHist();renderAdmin();
+  initBroadcast();
+}
+
+// ===================== TABS =====================
+function goTab(v){
+  ['ward','porter','admin','history'].forEach(n=>{
+    $('view-'+n)&&$('view-'+n).classList.add('hidden');
+    $('tab-'+n)&&$('tab-'+n).classList.remove('active');
+  });
+  $('view-'+v)&&$('view-'+v).classList.remove('hidden');
+  $('tab-'+v)&&$('tab-'+v).classList.add('active');
+  S.view=v;
+  if(v==='admin')renderAdmin();
+  if(v==='history')renderHist();
+  if(v==='ward')renderPorterStatusGrid();
+}
+
+// ===================== PORTER STATUS GRID =====================
+function renderPorterStatusGrid(){
+  const grid=$('porter-status-grid');
+  if(!grid)return;
+  const porters=Object.entries(DB).filter(([,u])=>u.role==='porter');
+  grid.innerHTML=porters.map(([key,p])=>{
+    const isAvail=p.status==='available';
+    const isBusy=p.status==='busy';
+    const isOff=p.status==='offline';
+    const isSel=S.selectedPorterKey===key;
+    let cls=isAvail?'available':isBusy?'busy':'offline';
+    if(isSel)cls+=' selected-porter';
+    const statusCls=isAvail?'s-available':isBusy?'s-busy':'s-offline';
+    const statusLabel=isAvail?'ว่าง':isBusy?'ให้บริการ':'ออฟไลน์';
+    const dotBlink=isBusy?'blink-dot':'';
+    const lockIcon=isBusy?'🔒':isOff?'⚫':'';
+    const selectMark=isSel?'<span class="ps-select-mark">✓</span>':'';
+    const stepLabel=isBusy&&p.currentStep!=null?`<div class="ps-busy-task">${STEPS[p.currentStep]||''}: ${p.currentJob||''}</div>`:'';
+    const onclick=isAvail?`onclick="selectPorter('${key}')"`:isOff?`title="ออฟไลน์"`:`title="${p.currentJob||'ให้บริการอยู่'}"`;
+    return`<div class="ps-card ${cls}" ${onclick}>
+      ${selectMark}
+      ${lockIcon?`<span class="ps-lock">${lockIcon}</span>`:''}
+      <span class="ps-av">${p.av}</span>
+      <div class="ps-name">${p.name}</div>
+      <div class="ps-pos">${p.pos}</div>
+      <div class="ps-rating">⭐ ${p.rating||'4.5'} (${p.jobs||0})</div>
+      <div class="ps-status ${statusCls}"><span class="ps-status-dot ${dotBlink}"></span>${statusLabel}</div>
+      ${stepLabel}
+    </div>`;
+  }).join('');
+}
+
+function selectPorter(key){
+  if(DB[key].status!=='available'){toast('⚠️ จนท.เปลคนนี้ไม่ว่าง');return;}
+  if(S.selectedPorterKey===key){
+    S.selectedPorterKey=null;
+    $('no-porter-selected').classList.remove('hidden');
+    $('porter-selected-info').classList.add('hidden');
+  } else {
+    S.selectedPorterKey=key;
+    $('no-porter-selected').classList.add('hidden');
+    $('porter-selected-info').classList.remove('hidden');
+    $('selected-porter-name').textContent=DB[key].name;
+    toast('✅ เลือก '+DB[key].name+' แล้ว');
+  }
+  renderPorterStatusGrid();
+}
+
+// ===================== TYPE & URG =====================
+function pickType(el,t){
+  document.querySelectorAll('.type-card').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel');S.type=t;$('sum-type').textContent=TYPES[t].label;
+}
+function pickUrg(el,u){
+  document.querySelectorAll('.urg-card').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel');S.urg=u;
+  $('sum-urg-pill').innerHTML=mkPill(u);
+  const btn=$('call-btn');btn.className='call-btn '+URGS[u].btnCls;
+  btn.innerHTML=`<div class="pulse"></div><div class="call-btn-ico">${{normal:'🔔',urgent:'🔔',emergency:'🚨',ems:'🚑',forensic:'🔵'}[u]}</div><div>เรียกเปล</div>`;
+}
+
+// ===================== CALL PORTER =====================
+function callPorter(){
+  const fr=$('sel-from').value,to=$('sel-to').value;
+  if(!fr){toast('⚠️ กรุณาเลือกแผนกต้นทาง');return;}
+  if(!to){toast('⚠️ กรุณาเลือกจุดหมายปลายทาง');return;}
+  // Check selected porter availability
+  if(S.selectedPorterKey&&DB[S.selectedPorterKey].status!=='available'){
+    S.selectedPorterKey=null;
+    $('no-porter-selected').classList.remove('hidden');
+    $('porter-selected-info').classList.add('hidden');
+    renderPorterStatusGrid();
+    toast('⚠️ เปลที่เลือกไม่ว่างแล้ว ระบบจะเลือกให้อัตโนมัติ');
+  }
+  const btn=$('call-btn'),orig=btn.innerHTML;
+  btn.innerHTML='<div class="pulse"></div><div class="spinner"></div><div style="margin-top:5px">กำลังส่ง...</div>';
+  btn.disabled=true;
+  // Find available porter
+  let porterKey=S.selectedPorterKey;
+  if(!porterKey){
+    const avail=Object.entries(DB).filter(([,u])=>u.role==='porter'&&u.status==='available');
+    if(!avail.length){btn.innerHTML=orig;btn.disabled=false;toast('⚠️ ไม่มีเปลว่าง กรุณาลองใหม่');return;}
+    porterKey=avail[0][0];
+  }
+  setTimeout(()=>{
+    btn.innerHTML=orig;btn.disabled=false;
+    const req={
+      id:'R'+Date.now(),type:S.type,urg:S.urg,from:fr,to,
+      porterKey,porter:DB[porterKey],
+      status:'waiting',time:tnow(),
+      requester:S.user?S.user.name:'—',step:-1,
+    };
+    S.request=req;S.active++;S.requests.push(req);
+    S.selectedPorterKey=null;
+    // Broadcast to porter
+    broadcastMsg({type:'REQUEST_CREATED',req:{...req,porter:{...DB[porterKey],username:porterKey}}});
+    // Show waiting state
+    showTrackingView(req);
+    updateTrackStep(-1);
+    toast('📤 ส่งคำขอถึง '+DB[porterKey].name+' แล้ว!');
+    beep(440,.1);setTimeout(()=>beep(550,.1),150);
+  },1000);
+}
+
+// ===================== TRACKING VIEW =====================
+function showTrackingView(req){
+  $('call-section').classList.add('hidden');
+  $('tracking-section').classList.remove('hidden');
+  const td=TYPES[req.type];
+  $('track-title').textContent=td.label+' → '+req.to;
+  $('track-pill').innerHTML=mkPill(req.urg);
+  const p=req.porter||DB[req.porterKey]||{};
+  $('track-av').textContent=p.av||'👨‍⚕️';
+  $('track-name').textContent=p.name||'—';
+  $('track-info').textContent=p.pos||'พนักงานเปล';
+  $('track-rating').textContent=p.rating||'4.8';
+  $('track-jobs').textContent='('+(p.jobs||0)+' เคส)';
+  renderPorterStatusGrid();
+}
+
+function updateTrackStep(step){
+  S.trackStep=step;
+  if(S.request)S.request.step=step;
+  // Render progress
+  const wrap=$('progress-steps');
+  if(!wrap)return;
+  wrap.innerHTML=`<div class="progress-track">
+    ${STEPS.map((s,i)=>{
+      const st=i<step?'done':i===step?'active':'pending';
+      const lineSt=i<step?'done':i===step?'active':'';
+      return`<div class="pstep">
+        <div class="pstep-line ${lineSt}"></div>
+        <div class="pstep-dot ${st}">${st==='done'?'✓':st==='active'?'→':i+1}</div>
+        <div class="pstep-label ${st}">${s}</div>
+      </div>`;
+    }).join('')}
+  </div>`;
+  // ETA
+  const etaEl=$('eta-val');
+  if(etaEl){
+    if(step===-1)etaEl.textContent='รอ จนท.รับเคส...';
+    else if(step<4)etaEl.textContent=STEP_ETA[step]||'—';
+    else etaEl.textContent='นำส่งเรียบร้อย ✅';
+  }
+}
+
+function finishTrack(){
+  S.done++;S.active=Math.max(0,S.active-1);
+  if(S.request){S.request.status='completed';}
+  toast('🎉 นำส่งเสร็จสิ้น! กรุณาให้คะแนน จนท.เปล',3000);
+  renderPorterStatusGrid();
+  setTimeout(openRate,2000);
+}
+function cancelReq(){
+  if(S.request){
+    broadcastMsg({type:'REQUEST_CANCELLED',reqId:S.request.id});
+    S.request.status='cancelled';
+  }
+  S.request=null;S.active=Math.max(0,S.active-1);
+  $('tracking-section').classList.add('hidden');$('call-section').classList.remove('hidden');
+  renderPorterStatusGrid();
+  toast('ยกเลิกการเรียกแล้ว');
+}
+
+// ===================== PORTER ACTIONS =====================
+let _it=null;
+function showIncoming(req){
+  S.incoming=req;
+  const td=TYPES[req.type];
+  $('inc-ico').textContent=td.ico;$('inc-type').textContent=td.label;
+  $('inc-upill').innerHTML=mkPill(req.urg);
+  $('inc-from').textContent=req.from;$('inc-to').textContent=req.to;
+  $('inc-time').textContent=req.time;$('inc-req').textContent=req.requester||'—';
+  $('incoming-section').classList.remove('hidden');$('idle-section').classList.add('hidden');
+  const b=$('alert-badge');b.textContent=parseInt(b.textContent||'0')+1;b.classList.add('on');
+  $('tdot-p').classList.add('on');
+  let tv=30;clearInterval(_it);
+  $('inc-timer').textContent=tv;$('inc-timer-fill').style.width='100%';
+  _it=setInterval(()=>{
+    tv--;
+    const el=$('inc-timer');if(el)el.textContent=tv;
+    const fill=$('inc-timer-fill');if(fill)fill.style.width=(tv/30*100)+'%';
+    if(tv<=0){clearInterval(_it);autoReject();}
+  },1000);
+  startAlert();
+  if(S.view!=='porter')toast('🔔 มีคำขอเข้ามา → คลิก "จนท.เปล"');
+  if('Notification' in window&&Notification.permission==='granted')
+    new Notification('🔔 คำขอใหม่! '+URGS[req.urg].emoji,{body:TYPES[req.type].label+' — '+req.from+' → '+req.to,icon:'icons/icon-192.png',tag:'porter',requireInteraction:true});
+}
+function simReq(data){
+  const req=data||{
+    id:'R'+Date.now(),
+    type:['wheelchair','stretcher','walking'][Math.floor(Math.random()*3)],
+    urg:['normal','urgent','emergency','ems','forensic'][Math.floor(Math.random()*5)],
+    from:['อายุรกรรม','ศัลยกรรม','ห้องฉุกเฉิน','OPD'][Math.floor(Math.random()*4)],
+    to:['X-Ray','CT Scan','ห้องผ่าตัด','ICU'][Math.floor(Math.random()*4)],
+    time:tnow(),requester:'Admin (Demo)',
+  };
+  if(S.user&&S.user.role==='porter'){showIncoming(req);return;}
+  broadcastMsg({type:'REQUEST_CREATED',req});
+  // If porter tab not open, simulate for admin view
+  S.active++;S.requests.push({...req,porter:null,status:'waiting'});
+  if(S.view==='admin')renderAdmin();
+  toast('🎭 ส่งคำขอ Demo แล้ว — เปิด Porter Tab เพื่อรับ');
+}
+function acceptReq(){
+  clearInterval(_it);stopAlert();
+  $('incoming-section').classList.add('hidden');$('idle-section').classList.remove('hidden');
+  clearBadge();
+  const r=S.incoming;S.incoming=null;S.active++;
+  // Update porter status
+  DB[S.user.username]={...DB[S.user.username],status:'busy',currentJob:TYPES[r.type].label+': '+r.from+' → '+r.to,currentStep:0};
+  // Broadcast to ward
+  broadcastMsg({type:'REQUEST_ACCEPTED',reqId:r.id,porterKey:S.user.username,porter:{...DB[S.user.username],username:S.user.username},jobDesc:TYPES[r.type].label+': '+r.from+' → '+r.to});
+  broadcastMsg({type:'PORTER_STATUS_CHANGED',key:S.user.username,status:'busy',currentJob:TYPES[r.type].label+': '+r.from+' → '+r.to});
+  addJob(r);
+  toast('✅ รับเคสแล้ว! กำลังเดินทาง');
+  beep(660,.12);setTimeout(()=>beep(880,.15),180);
+}
+function rejectReq(){clearInterval(_it);stopAlert();$('incoming-section').classList.add('hidden');$('idle-section').classList.remove('hidden');S.incoming=null;clearBadge();toast('ปฏิเสธเคสแล้ว');}
+function autoReject(){$('incoming-section').classList.add('hidden');$('idle-section').classList.remove('hidden');stopAlert();S.incoming=null;clearBadge();toast('⏰ หมดเวลา — ส่งต่อให้เปลคนอื่น');}
+function clearBadge(){const b=$('alert-badge');b.textContent='0';b.classList.remove('on');$('tdot-p').classList.remove('on');}
+
+// Add job card with status update buttons
+function addJob(r){
+  const nd=$('no-jobs');if(nd)nd.remove();
+  const jid='j'+Date.now();const el=document.createElement('div');
+  el.className='card fade-in';el.id=jid;
+  const td=TYPES[r.type];
+  el.style.marginBottom='12px';
+  el.innerHTML=`
+    <div class="card-hd" style="padding:10px 14px">
+      <div style="font-size:22px">${td.ico}</div>
+      <div style="flex:1"><div style="font-size:14px;font-weight:900">${td.label}</div><div style="font-size:12px;color:var(--text2)">${r.from} → ${r.to}</div></div>
+      ${mkPill(r.urg)}
+    </div>
+    <div style="padding:10px 14px 4px">
+      <div style="font-size:11px;font-weight:900;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.4px">อัพเดตสถานะ</div>
+      <div class="status-update-row" id="su-${jid}">
+        ${STEPS.slice(0,4).map((s,i)=>`<button id="sb-${jid}-${i}" class="status-btn ${i===0?'current':'future'}" onclick="updateMyStatus('${jid}','${r.id}',${i})">${i===0?'✅ ':''} ${s}</button>`).join('')}
+      </div>
+    </div>
+    <div style="padding:0 14px 12px;display:flex;gap:8px">
+      <button class="btn btn-success btn-sm" style="flex:1" onclick="finishJob('${jid}','${r.id}')">🏁 นำส่งเสร็จสิ้น</button>
+    </div>`;
+  $('active-jobs').prepend(el);
+  $('job-count').textContent='('+$('active-jobs').querySelectorAll('.card').length+')';
+}
+
+function updateMyStatus(jid,reqId,step){
+  // Update button states
+  for(let i=0;i<4;i++){
+    const btn=$('sb-'+jid+'-'+i);
+    if(!btn)continue;
+    if(i<step){btn.className='status-btn done-step';btn.textContent='✓ '+STEPS[i];}
+    else if(i===step){btn.className='status-btn current';btn.textContent='✅ '+STEPS[i];}
+    else{btn.className='status-btn future';btn.textContent=STEPS[i];}
+  }
+  DB[S.user.username]={...DB[S.user.username],currentStep:step};
+  // Broadcast to ward
+  broadcastMsg({type:'STATUS_UPDATE',reqId,porterKey:S.user.username,step});
+  toast('📍 อัพเดต: '+STEPS[step]);
+  beep(550,.08,'sine',.2);
+}
+function finishJob(jid,reqId){
+  const el=$(jid);if(el)el.remove();
+  S.done++;S.active=Math.max(0,S.active-1);
+  DB[S.user.username]={...DB[S.user.username],status:'available',currentJob:null,currentStep:null};
+  broadcastMsg({type:'STATUS_UPDATE',reqId,porterKey:S.user.username,step:4});
+  broadcastMsg({type:'PORTER_STATUS_CHANGED',key:S.user.username,status:'available',currentJob:null});
+  const rem=$('active-jobs').querySelectorAll('.card').length;
+  $('job-count').textContent=rem?'('+rem+')':'';
+  if(!rem){const nd=document.createElement('div');nd.id='no-jobs';nd.style.cssText='text-align:center;padding:16px;color:var(--text3);font-size:13px';nd.textContent='ยังไม่มีงาน';$('active-jobs').appendChild(nd);}
+  addHist({type:'wheelchair',urg:'normal',from:'—',to:'—',porter:S.user?S.user.name:'—',time:tnow(),rating:null});
+  toast('🎉 นำส่งเสร็จสิ้น! ขอบคุณ');
+  beep(660,.15);setTimeout(()=>beep(880,.2),200);
+}
+function toggleStatus(){
+  S.online=!S.online;
+  const newStatus=S.online?'available':'offline';
+  DB[S.user.username]={...DB[S.user.username],status:newStatus};
+  const p=$('porter-pill');
+  p.className=S.online?'pill pn':'pill';
+  if(!S.online){p.style.background='var(--gray-l)';p.style.color='var(--gray)';}
+  else{p.style.background='';p.style.color='';}
+  p.innerHTML='<span class="dot"></span>'+(S.online?'พร้อมรับงาน':'หยุดรับงาน');
+  broadcastMsg({type:'PORTER_STATUS_CHANGED',key:S.user.username,status:newStatus});
+  toast(S.online?'✅ เปิดรับงานแล้ว':'⏸️ หยุดรับงานชั่วคราว');
+}
+
+// ===================== ADMIN =====================
+function renderAdmin(){
+  $('st-w').textContent=S.waiting;$('st-a').textContent=S.active;$('st-d').textContent=S.done;
+  $('admin-porter-list').innerHTML=Object.entries(DB).filter(([,u])=>u.role==='porter').map(([k,p])=>`
+    <div class="list-item">
+      <div class="sdot-sm s-${p.status||'offline'}"></div>
+      <div style="font-size:20px">${p.av}</div>
+      <div style="flex:1">
+        <div style="font-size:14px;font-weight:900">${p.name}</div>
+        <div style="font-size:11px;color:var(--text2)">${p.pos}${p.currentJob?` • 📍 ${p.currentJob}`:''}</div>
+        ${p.currentStep!=null&&p.status==='busy'?`<div style="font-size:11px;color:var(--blue);margin-top:2px">ขั้นตอน: ${STEPS[p.currentStep]||''}</div>`:''}
+      </div>
+      <div style="font-size:12px;font-weight:900;color:${p.status==='available'?'var(--green)':p.status==='busy'?'var(--orange)':'var(--text3)'}">
+        ${p.status==='available'?'ว่าง':p.status==='busy'?'ให้บริการ':'ออฟไลน์'}
+      </div>
+    </div>`).join('');
+  const ar=S.requests.filter(r=>r.status!=='completed'&&r.status!=='cancelled');
+  $('admin-req-list').innerHTML=ar.length?ar.map(r=>`
+    <div class="list-item">
+      <div style="font-size:22px">${TYPES[r.type].ico}</div>
+      <div style="flex:1"><div style="font-size:14px;font-weight:900">${TYPES[r.type].label}</div>
+      <div style="font-size:12px;color:var(--text2)">${r.from} → ${r.to}</div>
+      <div style="font-size:12px;color:var(--text2)">จนท.: ${r.porter?r.porter.name:'รอรับ'}</div>
+      ${r.step!=null&&r.step>=0?`<div style="font-size:11px;color:var(--blue)">ขั้นตอน: ${STEPS[r.step]||'—'}</div>`:''}
+      </div>${mkPill(r.urg)}</div>`).join('')
+    :'<div style="text-align:center;color:var(--text3);font-size:13px;padding:12px">ยังไม่มีคำขอ</div>';
+}
+function renderUsers(){
+  const roleLabel={super:'⭐ Super Admin',admin:'🏥 Admin OPD',porter:'👨‍⚕️ Porter'};
+  const roleCls={super:'rb-super',admin:'rb-admin',porter:'rb-porter'};
+  $('user-list').innerHTML=Object.entries(DB).map(([k,u])=>`
+    <div class="list-item"><div style="font-size:20px">${u.av}</div>
+    <div style="flex:1"><div style="font-size:13px;font-weight:900">${u.name}</div>
+    <div style="font-size:11px;color:var(--text2)">@${k} • ${u.pos}</div></div>
+    <div class="role-badge ${roleCls[u.role]}">${roleLabel[u.role]}</div></div>`).join('');
+}
+
+// ===================== HISTORY =====================
+let histData=[
+  {type:'wheelchair',urg:'normal',from:'อายุรกรรม',to:'X-Ray',porter:'นาย นุกุล เฉลิมชาติ',time:'08:30',rating:5},
+  {type:'stretcher',urg:'ems',from:'ห้องฉุกเฉิน',to:'ห้องผ่าตัด',porter:'นาย วิจักษ์ ร่างรัตน์',time:'09:15',rating:4},
+  {type:'walking',urg:'normal',from:'OPD',to:'X-Ray',porter:'นาย สมชาติ ภูเขา',time:'10:02',rating:5},
+  {type:'wheelchair',urg:'forensic',from:'อายุรกรรม',to:'นิติเวช',porter:'นาย พิชิต สมใจ',time:'11:30',rating:5},
+];
+function addHist(h){histData.unshift(h);}
+function renderHist(){
+  $('hist-list').innerHTML=histData.length?histData.map(h=>{
+    const stars=h.rating?'⭐'.repeat(h.rating):`<span style="color:var(--text3);font-size:11px">ยังไม่ได้ให้คะแนน</span>`;
+    return`<div class="hist-item">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+          <span>${TYPES[h.type].ico}</span><span style="font-size:14px;font-weight:900">${TYPES[h.type].label}</span>${mkPill(h.urg)}
+        </div><div style="font-size:12px;color:var(--text2)">${h.time}</div>
+      </div>
+      <div style="font-size:13px;color:var(--text2);margin-bottom:5px">${h.from} → ${h.to}</div>
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <span style="font-size:12px;color:var(--text2)">👤 ${h.porter}</span><div>${stars}</div>
+      </div>
+    </div>`;
+  }).join(''):'<div style="text-align:center;padding:40px;color:var(--text3);font-size:13px">ยังไม่มีประวัติ</div>';
+}
+
+// ===================== RATING =====================
+function openRate(){$('rate-modal').classList.remove('hidden');$('rate-name').textContent=S.request?S.request.porter.name:'—';}
+function closeRate(){$('rate-modal').classList.add('hidden');}
+function setRating(n){S.ratingVal=n;document.querySelectorAll('.star').forEach((s,i)=>s.className='star'+(i<n?' on':''));const l=['','แย่มาก','พอใช้','ดีพอสมควร','ดีมาก','ดีเยี่ยม!'];$('rate-lbl').textContent=l[n]||'';}
+function submitRate(){
+  closeRate();
+  addHist({type:S.type,urg:S.urg,from:S.request?S.request.from:'—',to:S.request?S.request.to:'—',porter:S.request?S.request.porter.name:'—',time:tnow(),rating:S.ratingVal});
+  toast('⭐ ขอบคุณที่ให้คะแนน!');
+  $('tracking-section').classList.add('hidden');$('call-section').classList.remove('hidden');
+  renderPorterStatusGrid();S.request=null;
+}
+
+// ===================== PWA =====================
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+if('Notification' in window&&Notification.permission==='default')Notification.requestPermission();
+window.addEventListener('offline',()=>$('offline-bar').classList.add('on'));
+window.addEventListener('online',()=>$('offline-bar').classList.remove('on'));
+// Auto refresh porter grid every 3s
+setInterval(()=>{if(S.user&&S.view==='ward')renderPorterStatusGrid();if(S.user&&S.view==='admin')renderAdmin();},3000);
+</script>
+</body>
+</html>
