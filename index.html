@@ -721,7 +721,7 @@ function showTracking(req,res=false){
   $('track-av').textContent=req.porter.av||'👨‍⚕️';
   $('track-name').textContent=req.porter.name;
   $('track-rating').textContent=req.porter.rating||'4.8';
-  $('track-jobs').textContent='('+（req.porter.jobs||0)+' เคส)';
+  $('track-jobs').textContent='('+(req.porter.jobs||0)+' เคส)';
   renderSteps(res?-1:0);
 }
 function renderSteps(a){
